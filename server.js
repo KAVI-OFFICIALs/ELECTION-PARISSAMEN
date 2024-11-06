@@ -11,8 +11,8 @@ app.use(bodyParser.json());
 app.use(express.static('public'));
 
 // GitHub repository details
-const GITHUB_REPO = "username/repo"; // replace with your GitHub repo
-const FILE_PATH = "path/to/votes.json"; // replace with your file path in the repo
+const GITHUB_REPO = "KAVI-BOTCREATE/Election-2024"; // replace with your GitHub repo
+const FILE_PATH = "votes.json"; // replace with your file path in the repo
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 
 // Get results

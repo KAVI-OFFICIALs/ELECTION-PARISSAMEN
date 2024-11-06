@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poll Website</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #f8f9fa;
+            margin: 0;
+        }
+        
+        .poll-container {
+            width: 80%;
+            max-width: 600px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            text-align: center;
+        }
+
+        .poll-title {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .poll-option {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 10px 0;
+            padding: 10px;
+            background: #f1f1f1;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .poll-option:hover {
+            background: #e0e0e0;
+        }
+
+        .option-label {
+            font-size: 1rem;
+            color: #333;
+        }
+
+        .option-bar {
+            background: #d1d1d1;
+            height: 10px;
+            border-radius: 5px;
+            flex-grow: 1;
+            margin: 0 10px;
+            position: relative;
+        }
+
+        .option-fill {
+            background: #28a745;
+            height: 100%;
+            border-radius: 5px;
+            width: 0;
+            transition: width 0.3s;
+        }
+
+        .option-percentage {
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        #submit-vote {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: background 0.3s;
+        }
+
+        #submit-vote:hover {
+            background: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="poll-container">
+        <h2 class="poll-title">What design tool do you use the most?</h2>
+
+        <div class="poll-option" onclick="vote('Sketch')">
+            <span class="option-label">Sketch</span>
+            <div class="option-bar">
+                <div class="option-fill" id="sketch-bar"></div>
+            </div>
+            <span class="option-percentage" id="sketch-percentage">0%</span>
+        </div>
+
+        <div class="poll-option" onclick="vote('Figma')">
+            <span class="option-label">Figma</span>
+            <div class="option-bar">
+                <div class="option-fill" id="figma-bar"></div>
+            </div>
+            <span class="option-percentage" id="figma-percentage">0%</span>
+        </div>
+
+        <div class="poll-option" onclick="vote('Photoshop')">
+            <span class="option-label">Photoshop</span>
+            <div class="option-bar">
+                <div class="option-fill" id="photoshop-bar"></div>
+            </div>
+            <span class="option-percentage" id="photoshop-percentage">0%</span>
+        </div>
+
+        <button id="submit-vote" onclick="submitVote()">Submit your vote</button>
+    </div>
+
+    <script>
+        let selectedVote = null;
+        let hasVoted = false;
+
+        function vote(option) {
+            if (hasVoted) {
+                alert("You have already voted!");
+                return;
+            }
+            selectedVote = option;
+        }
+
+        async function submitVote() {
+            if (!selectedVote) {
+                alert("Please select an option!");
+                return;
+            }
+            
+            try {
+                const response = await fetch('/submit-vote', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ option: selectedVote })
+                });
+                
+                if (response.ok) {
+                    hasVoted = true;
+                    alert("Your vote has been submitted!");
+                    fetchResults();
+                } else {
+                    alert("There was an error submitting your vote.");
+                }
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        }
+
+        async function fetchResults() {
+            const response = await fetch('/get-results');
+            const data = await response.json();
+
+            const totalVotes = data.Sketch + data.Figma + data.Photoshop;
+            document.getElementById("sketch-percentage").innerText = `${((data.Sketch / totalVotes) * 100).toFixed(1)}%`;
+            document.getElementById("figma-percentage").innerText = `${((data.Figma / totalVotes) * 100).toFixed(1)}%`;
+            document.getElementById("photoshop-percentage").innerText = `${((data.Photoshop / totalVotes) * 100).toFixed(1)}%`;
+
+            document.getElementById("sketch-bar").style.width = `${(data.Sketch / totalVotes) * 100}%`;
+            document.getElementById("figma-bar").style.width = `${(data.Figma / totalVotes) * 100}%`;
+            document.getElementById("photoshop-bar").style.width = `${(data.Photoshop / totalVotes) * 100}%`;
+        }
+
+        // Initial fetch of results
+        fetchResults();
+    </script>
+</body>
+  </html>
